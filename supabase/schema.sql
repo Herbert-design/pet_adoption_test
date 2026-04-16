@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS pets (
   personality TEXT[] NOT NULL,
   story TEXT NOT NULL,
   medical_status JSONB NOT NULL,
+  status TEXT DEFAULT 'available', -- 'available' | 'adopted'
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -60,6 +61,16 @@ CREATE TABLE IF NOT EXISTS search_history (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   query TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Create notifications table
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  message TEXT NOT NULL,
+  type TEXT DEFAULT 'info', -- 'info' | 'success' | 'alert'
+  is_read BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -118,3 +129,8 @@ VALUES
 ('33333333-3333-3333-3333-333333333333', '棉花糖', '布偶猫', '1岁', '雌性', '4kg', '12km', 'https://lh3.googleusercontent.com/aida-public/AB6AXuCd16t3byIWUkVFXEwj-Dm5acBGcXrregGWE_lO2irWhM70NYSrCgO5Q1LoQKY8pBSUVfFr6M6z5vz4fPPqE3_Hh8FYdoqBYb2wGz-mnqy15eYKCeUJsKRiezi1q8yURhQ51mmt8MOgO5vjHFMnzEze3IQ4LLxT4qg-bV_p0_m8oPBjpavBKF5t38XOnlHBjrdh3TYoX7H27q1u4eNV4NAFV0G-TMBfwCO-J2pSuQyH4JFVKKLlZJOg1Oh42z8q4hWFjJG7yyZONYY', 'cat', '北京 · 朝阳区', ARRAY['文静', '粘人', '高颜值'], '棉花糖就像它的名字一样柔软。它喜欢静静地待在窗边晒太阳，是一只非常省心的猫咪。', '[{"label": "全套疫苗", "value": "已接种"}, {"label": "绝育手术", "value": "已完成"}]'),
 ('44444444-4444-4444-4444-444444444444', '布丁', '柯基', '4岁', '雄性', '12kg', '8km', 'https://lh3.googleusercontent.com/aida-public/AB6AXuBsM8reF-SXJKa1fINr7PfLvbq_GKmhPXMrmdwJgXUR1Fv6P1MD4O-Jx2C0OW19Uk9Svn7rZ6jzYSdD5pCpkkMSivdEbvnVs2yoAVh9vjH7oPUC3UVFWRjjVJmE0vZ4t-orwMO5SoAyvqBY2HYpzk71TQrrGtm-b_07vf95dND1-rPmtveGVsmdSwRPgVovoQkjjhsFYmfqdVgm-OV7HQRt8SZDuMu6sLBcKgiACwjwMPo05_CpOOsPhrQ31exJgAovooX-POJqq7I', 'dog', '广州 · 天河区', ARRAY['聪明', '贪吃', '短腿可爱'], '布丁是一只非常典型的柯基，虽然腿短但是跑得很快。它非常聪明，已经学会了很多指令。', '[{"label": "年度疫苗", "value": "已接种"}, {"label": "驱虫", "value": "每月定期"}]')
 ON CONFLICT (id) DO NOTHING;
+
+-- Notifications: Users can see and update their own
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can see their own notifications" ON notifications FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can update their own notifications" ON notifications FOR UPDATE USING (auth.uid() = user_id);

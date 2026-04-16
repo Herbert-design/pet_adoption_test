@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Search, Heart, User, Compass } from 'lucide-react';
 import { cn } from '@/src/lib/utils';
 import { useAuth } from '../context/AuthContext';
+import { NotificationCenter } from './NotificationCenter';
 
 export function BottomNavBar() {
   const location = useLocation();
@@ -47,19 +48,24 @@ export function TopAppBar({ title }: { title?: string }) {
           {title || "宠愈 Sanctuary"}
         </h1>
       </div>
-      {authenticated ? (
-        <Link to="/profile" className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
-          <img 
-            alt="User Avatar" 
-            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCd7amYfa1IK1HpwnvG1gKBM27oRJDXHmHqotZDyBr_mJI0cvi3zz69iLGfsQVfVN97GBlhbEu7nOttHeqnvGZcGfTzRzbtK4emkCx6GV--P6EL2U-hxZqCNUSHCTOHXFRmKBJwvUqWpDYSphCYrhSKvc_9tNb_YddOggZ2YfC3zL4MpXYn2c6LJhksicb70-U4qZgii47y7KhC8WL15Q0ZZqdUzJpCXEOYLfoqHWKe0c5LYQEFb5KIRoZv1pj9-c1FiwiwuGuon8o"
-            referrerPolicy="no-referrer"
-          />
-        </Link>
-      ) : (
-        <Link to="/login" className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors">
-          <User size={20} />
-        </Link>
-      )}
+      <div className="flex items-center gap-3">
+        {authenticated ? (
+          <>
+            <NotificationCenter />
+            <Link to="/profile" className="w-10 h-10 rounded-full overflow-hidden border-2 border-primary-fixed">
+              <img 
+                alt="User Avatar" 
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCd7amYfa1IK1HpwnvG1gKBM27oRJDXHmHqotZDyBr_mJI0cvi3zz69iLGfsQVfVN97GBlhbEu7nOttHeqnvGZcGfTzRzbtK4emkCx6GV--P6EL2U-hxZqCNUSHCTOHXFRmKBJwvUqWpDYSphCYrhSKvc_9tNb_YddOggZ2YfC3zL4MpXYn2c6LJhksicb70-U4qZgii47y7KhC8WL15Q0ZZqdUzJpCXEOYLfoqHWKe0c5LYQEFb5KIRoZv1pj9-c1FiwiwuGuon8o"
+                referrerPolicy="no-referrer"
+              />
+            </Link>
+          </>
+        ) : (
+          <Link to="/login" className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors">
+            <User size={20} />
+          </Link>
+        )}
+      </div>
     </header>
   );
 }

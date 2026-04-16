@@ -1,4 +1,5 @@
 import { supabase } from './lib/supabase';
+export { supabase };
 
 export interface Pet {
   id: string;
@@ -10,6 +11,7 @@ export interface Pet {
   distance: string;
   image: string;
   type: 'dog' | 'cat';
+  status: 'available' | 'adopted';
   location: string;
   personality: string[];
   story: string;
@@ -45,7 +47,8 @@ export const PETS: Pet[] = [
       { label: '狂犬病疫苗', value: '最后接种日期：2023年10月15日' },
       { label: '绝育手术', value: '状态：已完成' },
       { label: '驱虫处理', value: '状态：已完成体内外常规驱虫' }
-    ]
+    ],
+    status: 'available'
   },
   {
     id: '2',
@@ -63,7 +66,8 @@ export const PETS: Pet[] = [
     medicalStatus: [
       { label: '猫三联疫苗', value: '已接种第一针' },
       { label: '驱虫处理', value: '已完成' }
-    ]
+    ],
+    status: 'available'
   },
   {
     id: '3',
@@ -81,7 +85,8 @@ export const PETS: Pet[] = [
     medicalStatus: [
       { label: '全套疫苗', value: '已接种' },
       { label: '绝育手术', value: '已完成' }
-    ]
+    ],
+    status: 'available'
   },
   {
     id: '4',
@@ -99,7 +104,8 @@ export const PETS: Pet[] = [
     medicalStatus: [
       { label: '年度疫苗', value: '已接种' },
       { label: '驱虫', value: '每月定期' }
-    ]
+    ],
+    status: 'available'
   }
 ];
 
@@ -138,11 +144,16 @@ export const updateMyProfile = async (updates: Partial<Profile>) => {
 };
 
 // Database Fetchers
-export const getAllPets = async (): Promise<Pet[]> => {
-  const { data, error } = await supabase
+export const getAllPets = async (includeAdopted = false): Promise<Pet[]> => {
+  let query = supabase
     .from('pets')
-    .select('*')
-    .order('created_at', { ascending: false });
+    .select('*');
+  
+  if (!includeAdopted) {
+    query = query.eq('status', 'available');
+  }
+
+  const { data, error } = await query.order('created_at', { ascending: false });
 
   if (error) {
     console.error('Error fetching pets:', error);
@@ -312,6 +323,41 @@ export const checkIfAppliedForPet = async (petId: string): Promise<boolean> => {
 
   if (error) return false;
   return (count || 0) > 0;
+};
+
+// Notification Types & Helpers
+export interface Notification {
+  id: string;
+  user_id: string;
+  message: string;
+  type: 'info' | 'success' | 'alert';
+  is_read: boolean;
+  created_at: string;
+}
+
+export const getMyNotifications = async (): Promise<Notification[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data, error } = await supabase
+    .from('notifications')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching notifications:', error);
+    return [];
+  }
+
+  return data;
+};
+
+export const markNotificationAsRead = async (id: string) => {
+  await supabase
+    .from('notifications')
+    .update({ is_read: true })
+    .eq('id', id);
 };
 
 // Application Types
