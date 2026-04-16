@@ -79,11 +79,14 @@ CREATE TABLE IF NOT EXISTS notifications (
 -- Pets: Everyone can read
 ALTER TABLE pets ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow public read access to pets" ON pets FOR SELECT USING (true);
+CREATE POLICY "Allow authenticated users to insert pets" ON pets FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated users to update pets" ON pets FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- Applications: Users can see and insert their own
 ALTER TABLE applications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can see their own applications" ON applications FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own applications" ON applications FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Allow authenticated users to update applications" ON applications FOR UPDATE USING (auth.role() = 'authenticated');
 
 -- Favorites: Users can see and manage their own
 ALTER TABLE favorites ENABLE ROW LEVEL SECURITY;
@@ -134,3 +137,4 @@ ON CONFLICT (id) DO NOTHING;
 ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can see their own notifications" ON notifications FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update their own notifications" ON notifications FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Allow authenticated users to insert notifications" ON notifications FOR INSERT WITH CHECK (auth.role() = 'authenticated');

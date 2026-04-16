@@ -102,9 +102,9 @@ export function PetManager() {
       setActiveTab('list');
       loadPets();
       resetForm();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Submit failed:', error);
-      alert('提交失败，请检查数据');
+      alert(`提交失败: ${error.message || '未知错误'}`);
     }
   };
 

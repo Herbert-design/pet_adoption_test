@@ -76,9 +76,9 @@ export function ApplicationManager() {
       alert('审批成功！已通知用户，宠物已下线。');
       loadApplications();
       setSelectedApp(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Approval failed:', error);
-      alert('审批操作失败');
+      alert(`审批操作失败: ${error.message || '未知错误'}`);
     } finally {
       setProcessingId(null);
     }
@@ -113,8 +113,9 @@ export function ApplicationManager() {
       alert('申请已拒绝');
       loadApplications();
       setSelectedApp(null);
-    } catch (error) {
-       console.error('Rejection failed:', error);
+    } catch (error: any) {
+      console.error('Rejection failed:', error);
+      alert(`操作失败: ${error.message || '未知错误'}`);
     } finally {
       setProcessingId(null);
     }
